@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">TestTaskVasilev</string>
+    <string name="tab_text_1">Albums online</string>
+    <string name="tab_text_2">Albums offline</string>
+    <string name="tab_text_3">Geolocation</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="URL">https://jsonplaceholder.typicode.com/</string>
+    <string name="Start">Start</string>
+    <string name="Stop">Stop</string>
+</resources>
