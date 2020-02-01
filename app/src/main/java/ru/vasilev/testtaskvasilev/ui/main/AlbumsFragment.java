@@ -2,30 +2,24 @@ package ru.vasilev.testtaskvasilev.ui.main;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import ru.vasilev.testtaskvasilev.MyAlbumsRecyclerViewAdapter;
 import ru.vasilev.testtaskvasilev.R;
 import ru.vasilev.testtaskvasilev.call.APIService;
+import ru.vasilev.testtaskvasilev.call.ApiServiceFactory;
 import ru.vasilev.testtaskvasilev.data.Album;
-import ru.vasilev.testtaskvasilev.dummy.DummyContent;
 
 /**
  * A fragment representing a list of Items.
@@ -35,10 +29,6 @@ import ru.vasilev.testtaskvasilev.dummy.DummyContent;
  */
 public class AlbumsFragment extends Fragment {
 
-    // TODO: Customize parameter argument names
-    private static final String ARG_COLUMN_COUNT = "column-count";
-    // TODO: Customize parameters
-    private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
 
     /**
@@ -48,12 +38,9 @@ public class AlbumsFragment extends Fragment {
     public AlbumsFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static AlbumsFragment newInstance(int columnCount) {
+    public static AlbumsFragment newInstance() {
         AlbumsFragment fragment = new AlbumsFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
         return fragment;
     }
@@ -61,10 +48,6 @@ public class AlbumsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (getArguments() != null) {
-            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
-        }
     }
 
     @Override
@@ -72,43 +55,28 @@ public class AlbumsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_albums_list, container, false);
         final RecyclerView recyclerView;
-        // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
             recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-            }
-            recyclerView.setAdapter(new MyAlbumsRecyclerViewAdapter(DummyContent.ITEMS, mListener));
-
-
-            OkHttpClient client = new OkHttpClient.Builder()
-                    .readTimeout(10, TimeUnit.SECONDS)
-                    .build();
-
-            final Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(getString(R.string.URL))
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .client(client)
-                    .build();
-
-            final APIService apiService = retrofit.create(APIService.class);
-            final Call<List<Album>> listCall = apiService.loadAlbums();
-            listCall.enqueue(new Callback<List<Album>>() {
+            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+            ApiServiceFactory apiServiceFactory = new ApiServiceFactory();
+            APIService apiService = apiServiceFactory.Read();
+            final Call<List<Album>> listCallAlbums = apiService.loadAlbums();
+            listCallAlbums.enqueue(new Callback<List<Album>>() {
                 @Override
                 public void onResponse(Call<List<Album>> call, Response<List<Album>> response) {
                     if (response.isSuccessful()) {
-                        DummyContent.ITEMS = response.body();
+                        List<Album> albums = response.body();
+                        MyAlbumsRecyclerViewAdapter adapter = new MyAlbumsRecyclerViewAdapter(albums, mListener);
+
+                        recyclerView.setAdapter(adapter);
+
                         recyclerView.getAdapter().notifyDataSetChanged();
-                        Log.d("OK", "responce is Successful");
                     }
                 }
 
                 @Override
                 public void onFailure(Call<List<Album>> call, Throwable t) {
-                    Log.e("failure", "Something wrong " + t.getMessage());
                 }
             });
 
@@ -146,7 +114,6 @@ public class AlbumsFragment extends Fragment {
      */
 
     public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onListFragmentInteraction(Album item);
     }
 }

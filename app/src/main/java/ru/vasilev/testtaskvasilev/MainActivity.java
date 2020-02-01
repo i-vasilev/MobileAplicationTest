@@ -1,5 +1,6 @@
 package ru.vasilev.testtaskvasilev;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -15,6 +16,8 @@ import ru.vasilev.testtaskvasilev.ui.main.SectionsPagerAdapter;
 
 public class MainActivity extends AppCompatActivity implements AlbumsFragment.OnListFragmentInteractionListener, GpsFragment.OnFragmentInteractionListener {
 
+    public static final String ID = "id";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,7 +31,9 @@ public class MainActivity extends AppCompatActivity implements AlbumsFragment.On
 
     @Override
     public void onListFragmentInteraction(Album item) {
-
+        Intent intent = new Intent(this, AlbumActivity.class);
+        intent.putExtra(ID, item.getId());
+        startActivity(intent);
     }
 
     @Override

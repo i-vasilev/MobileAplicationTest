@@ -12,6 +12,8 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -63,7 +65,14 @@ public class GpsFragment extends Fragment {
 
         @Override
         public void onProviderEnabled(String provider) {
-            showLocation(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_MEDIA_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                showLocation(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_MEDIA_LOCATION}, 5);
+                }
+            }
+
         }
 
         @Override
@@ -80,29 +89,26 @@ public class GpsFragment extends Fragment {
         final Button button = view.findViewById(R.id.gps);
         textView = view.findViewById(R.id.infoGps);
         mediaPlayer = MediaPlayer.create(this.getContext(), R.raw.music);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (inflater.getContext().checkSelfPermission(Manifest.permission.ACCESS_MEDIA_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        if (!isStartedListener) {
-                            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                                    1, 1, locationListener);
-                            button.setText(R.string.Stop);
-                            mediaPlayer.start();
-                        } else {
-                            locationManager.removeUpdates(locationListener);
-                            button.setText(R.string.Start);
-                            mediaPlayer.stop();
-                            try {
-                                mediaPlayer.prepare();
-                                mediaPlayer.seekTo(0);
-                            } catch (IOException e) {
-                                Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
+        button.setOnClickListener(v -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (inflater.getContext().checkSelfPermission(Manifest.permission.ACCESS_MEDIA_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    if (!isStartedListener) {
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                                1, 1, locationListener);
+                        button.setText(R.string.Stop);
+                        mediaPlayer.start();
+                    } else {
+                        locationManager.removeUpdates(locationListener);
+                        button.setText(R.string.Start);
+                        mediaPlayer.stop();
+                        try {
+                            mediaPlayer.prepare();
+                            mediaPlayer.seekTo(0);
+                        } catch (IOException e) {
+                            Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
-                        isStartedListener = !isStartedListener;
                     }
+                    isStartedListener = !isStartedListener;
                 }
             }
         });
@@ -138,7 +144,7 @@ public class GpsFragment extends Fragment {
         if (location == null)
             return "";
         return String.format(
-                "Coordinates: lat = %1$.4f, lon = %2$.4f, time = %3$tF %3$tT",
+                getContext().getString(R.string.coordinatesString),
                 location.getLatitude(), location.getLongitude(), new Date(
                         location.getTime()));
     }

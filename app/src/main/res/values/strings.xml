@@ -4,9 +4,8 @@
     <string name="tab_text_2">Albums offline</string>
     <string name="tab_text_3">Geolocation</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="URL">https://jsonplaceholder.typicode.com/</string>
     <string name="Start">Start</string>
     <string name="Stop">Stop</string>
+    <string name="coordinatesString">Coordinates: lat = %1$.4f, lon = %2$.4f, time = %3$tF %3$tT</string>
 </resources>

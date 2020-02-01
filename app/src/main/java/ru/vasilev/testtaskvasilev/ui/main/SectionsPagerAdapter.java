@@ -29,15 +29,14 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                AlbumsFragment albumsFragment = AlbumsFragment.newInstance(1);
-                return albumsFragment;
+                return AlbumsFragment.newInstance();
             case 1:
                 return PlaceholderFragment.newInstance(position);
             case 2:
                 return new GpsFragment();
 
         }
-        return PlaceholderFragment.newInstance(position + 1);
+        return PlaceholderFragment.newInstance(position);
     }
 
     @Nullable
