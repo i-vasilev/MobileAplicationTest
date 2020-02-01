@@ -1,4 +1,4 @@
-package ru.vasilev.testtaskvasilev;
+package ru.vasilev.testtaskvasilev.ui;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,6 +9,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.squareup.picasso.Picasso;
+
+import ru.vasilev.testtaskvasilev.R;
 
 public class PhotoActivity extends AppCompatActivity {
 

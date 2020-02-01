@@ -15,11 +15,13 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import ru.vasilev.testtaskvasilev.MyAlbumsRecyclerViewAdapter;
 import ru.vasilev.testtaskvasilev.R;
-import ru.vasilev.testtaskvasilev.call.APIService;
-import ru.vasilev.testtaskvasilev.call.ApiServiceFactory;
 import ru.vasilev.testtaskvasilev.data.Album;
+import ru.vasilev.testtaskvasilev.data.IO.IOType;
+import ru.vasilev.testtaskvasilev.data.IO.db.DBHelper;
+import ru.vasilev.testtaskvasilev.data.IO.network.APIService;
+import ru.vasilev.testtaskvasilev.data.IO.network.ApiServiceFactory;
+import ru.vasilev.testtaskvasilev.data.adapters.MyAlbumsRecyclerViewAdapter;
 
 /**
  * A fragment representing a list of Items.
@@ -30,6 +32,10 @@ import ru.vasilev.testtaskvasilev.data.Album;
 public class AlbumsFragment extends Fragment {
 
     private OnListFragmentInteractionListener mListener;
+    private RecyclerView recyclerView;
+    private IOType ioType;
+
+    public static final String IO_TYPE_NAME = "IO-TYPE";
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -38,9 +44,10 @@ public class AlbumsFragment extends Fragment {
     public AlbumsFragment() {
     }
 
-    public static AlbumsFragment newInstance() {
+    public static AlbumsFragment newInstance(IOType ioType) {
         AlbumsFragment fragment = new AlbumsFragment();
         Bundle args = new Bundle();
+        args.putString(IO_TYPE_NAME, ioType.toString());
         fragment.setArguments(args);
         return fragment;
     }
@@ -53,35 +60,43 @@ public class AlbumsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_albums_list, container, false);
-        final RecyclerView recyclerView;
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            recyclerView = (RecyclerView) view;
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            ApiServiceFactory apiServiceFactory = new ApiServiceFactory();
-            APIService apiService = apiServiceFactory.Read();
-            final Call<List<Album>> listCallAlbums = apiService.loadAlbums();
-            listCallAlbums.enqueue(new Callback<List<Album>>() {
-                @Override
-                public void onResponse(Call<List<Album>> call, Response<List<Album>> response) {
-                    if (response.isSuccessful()) {
-                        List<Album> albums = response.body();
-                        MyAlbumsRecyclerViewAdapter adapter = new MyAlbumsRecyclerViewAdapter(albums, mListener);
+        recyclerView = (RecyclerView) inflater.inflate(R.layout.fragment_albums_list, container, false);
+        Context context = recyclerView.getContext();
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        ioType = IOType.valueOf(getArguments().getString(IO_TYPE_NAME));
 
-                        recyclerView.setAdapter(adapter);
+        switch (ioType) {
+            case Network:
+                ApiServiceFactory apiServiceFactory = new ApiServiceFactory();
+                APIService apiService = apiServiceFactory.Read();
+                final Call<List<Album>> listCallAlbums = apiService.loadAlbums();
 
-                        recyclerView.getAdapter().notifyDataSetChanged();
+                listCallAlbums.enqueue(new Callback<List<Album>>() {
+                    @Override
+                    public void onResponse(Call<List<Album>> call, Response<List<Album>> response) {
+                        if (response.isSuccessful()) {
+                            List<Album> albums = response.body();
+                            MyAlbumsRecyclerViewAdapter adapter = new MyAlbumsRecyclerViewAdapter(albums, mListener, ioType);
+                            recyclerView.setAdapter(adapter);
+                            recyclerView.getAdapter().notifyDataSetChanged();
+                        }
                     }
-                }
 
-                @Override
-                public void onFailure(Call<List<Album>> call, Throwable t) {
-                }
-            });
-
+                    @Override
+                    public void onFailure(Call<List<Album>> call, Throwable t) {
+                    }
+                });
+                break;
+            case DB:
+                DBHelper dbHelper = new DBHelper(getContext());
+                final List<Album> albums = dbHelper.selectAlbums();
+                MyAlbumsRecyclerViewAdapter adapter = new MyAlbumsRecyclerViewAdapter(albums, mListener, ioType);
+                recyclerView.setAdapter(adapter);
+                recyclerView.getAdapter().notifyDataSetChanged();
+                break;
         }
-        return view;
+
+        return recyclerView;
     }
 
 
@@ -102,18 +117,7 @@ public class AlbumsFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-
     public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(Album item);
+        void onListFragmentInteraction(Album item, IOType ioType);
     }
 }

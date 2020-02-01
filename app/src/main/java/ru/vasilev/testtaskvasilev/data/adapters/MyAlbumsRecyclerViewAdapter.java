@@ -1,4 +1,4 @@
-package ru.vasilev.testtaskvasilev;
+package ru.vasilev.testtaskvasilev.data.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +9,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+import ru.vasilev.testtaskvasilev.R;
 import ru.vasilev.testtaskvasilev.data.Album;
+import ru.vasilev.testtaskvasilev.data.IO.IOType;
 import ru.vasilev.testtaskvasilev.ui.main.AlbumsFragment;
 
 /**
@@ -20,10 +22,12 @@ public class MyAlbumsRecyclerViewAdapter extends RecyclerView.Adapter<MyAlbumsRe
 
     private final List<Album> mValues;
     private final AlbumsFragment.OnListFragmentInteractionListener mListener;
+    private final IOType ioType;
 
-    public MyAlbumsRecyclerViewAdapter(List<Album> items, AlbumsFragment.OnListFragmentInteractionListener listener) {
+    public MyAlbumsRecyclerViewAdapter(List<Album> items, AlbumsFragment.OnListFragmentInteractionListener listener, IOType ioType) {
         mValues = items;
         mListener = listener;
+        this.ioType = ioType;
     }
 
     @Override
@@ -40,7 +44,7 @@ public class MyAlbumsRecyclerViewAdapter extends RecyclerView.Adapter<MyAlbumsRe
 
         holder.mView.setOnClickListener(v -> {
             if (null != mListener) {
-                mListener.onListFragmentInteraction(holder.mItem);
+                mListener.onListFragmentInteraction(holder.mItem, ioType);
             }
         });
     }

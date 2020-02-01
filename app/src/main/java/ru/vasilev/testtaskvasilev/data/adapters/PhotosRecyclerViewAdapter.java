@@ -1,4 +1,4 @@
-package ru.vasilev.testtaskvasilev;
+package ru.vasilev.testtaskvasilev.data.adapters;
 
 import android.net.Uri;
 import android.view.LayoutInflater;
@@ -14,6 +14,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import ru.vasilev.testtaskvasilev.R;
 import ru.vasilev.testtaskvasilev.data.Photo;
 
 public class PhotosRecyclerViewAdapter extends RecyclerView.Adapter<PhotosRecyclerViewAdapter.ViewHolder> {
@@ -36,7 +37,7 @@ public class PhotosRecyclerViewAdapter extends RecyclerView.Adapter<PhotosRecycl
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.mItem =photos.get(position);
+        holder.mItem = photos.get(position);
         Uri uri = Uri.parse(holder.mItem.getThumbnailUrl());
         Picasso.get()
                 .load(uri)

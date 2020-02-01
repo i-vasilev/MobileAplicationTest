@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
 import ru.vasilev.testtaskvasilev.R;
+import ru.vasilev.testtaskvasilev.data.IO.IOType;
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
@@ -29,14 +30,14 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                return AlbumsFragment.newInstance();
+                return AlbumsFragment.newInstance(IOType.Network);
             case 1:
-                return PlaceholderFragment.newInstance(position);
+                return AlbumsFragment.newInstance(IOType.DB);
             case 2:
                 return new GpsFragment();
 
         }
-        return PlaceholderFragment.newInstance(position);
+        return new GpsFragment();
     }
 
     @Nullable

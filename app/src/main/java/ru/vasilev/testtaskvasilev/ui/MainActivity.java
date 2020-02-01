@@ -1,4 +1,4 @@
-package ru.vasilev.testtaskvasilev;
+package ru.vasilev.testtaskvasilev.ui;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -9,14 +9,18 @@ import com.google.android.material.tabs.TabLayout;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 
+import ru.vasilev.testtaskvasilev.R;
+import ru.vasilev.testtaskvasilev.data.IO.IOType;
 import ru.vasilev.testtaskvasilev.ui.main.GpsFragment;
 import ru.vasilev.testtaskvasilev.data.Album;
 import ru.vasilev.testtaskvasilev.ui.main.AlbumsFragment;
 import ru.vasilev.testtaskvasilev.ui.main.SectionsPagerAdapter;
 
-public class MainActivity extends AppCompatActivity implements AlbumsFragment.OnListFragmentInteractionListener, GpsFragment.OnFragmentInteractionListener {
+import static ru.vasilev.testtaskvasilev.ui.main.AlbumsFragment.IO_TYPE_NAME;
 
-    public static final String ID = "id";
+public class MainActivity extends AppCompatActivity implements AlbumsFragment.OnListFragmentInteractionListener {
+
+    public static final String album = "album";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,14 +34,10 @@ public class MainActivity extends AppCompatActivity implements AlbumsFragment.On
     }
 
     @Override
-    public void onListFragmentInteraction(Album item) {
+    public void onListFragmentInteraction(Album item, IOType ioType) {
         Intent intent = new Intent(this, AlbumActivity.class);
-        intent.putExtra(ID, item.getId());
+        intent.putExtra(album, item);
+        intent.putExtra(IO_TYPE_NAME, ioType.toString());
         startActivity(intent);
-    }
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
     }
 }
