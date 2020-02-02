@@ -12,15 +12,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 import ru.vasilev.testtaskvasilev.R;
 import ru.vasilev.testtaskvasilev.data.Album;
 import ru.vasilev.testtaskvasilev.data.IO.IOType;
 import ru.vasilev.testtaskvasilev.data.IO.db.DBHelper;
 import ru.vasilev.testtaskvasilev.data.IO.network.APIService;
-import ru.vasilev.testtaskvasilev.data.IO.network.ApiServiceFactory;
+import ru.vasilev.testtaskvasilev.data.IO.network.RetrofitClient;
 import ru.vasilev.testtaskvasilev.data.adapters.MyAlbumsRecyclerViewAdapter;
 
 /**
@@ -67,36 +67,29 @@ public class AlbumsFragment extends Fragment {
 
         switch (ioType) {
             case Network:
-                ApiServiceFactory apiServiceFactory = new ApiServiceFactory();
-                APIService apiService = apiServiceFactory.Read();
-                final Call<List<Album>> listCallAlbums = apiService.loadAlbums();
-
-                listCallAlbums.enqueue(new Callback<List<Album>>() {
-                    @Override
-                    public void onResponse(Call<List<Album>> call, Response<List<Album>> response) {
-                        if (response.isSuccessful()) {
-                            List<Album> albums = response.body();
-                            MyAlbumsRecyclerViewAdapter adapter = new MyAlbumsRecyclerViewAdapter(albums, mListener, ioType);
-                            recyclerView.setAdapter(adapter);
-                            recyclerView.getAdapter().notifyDataSetChanged();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<List<Album>> call, Throwable t) {
-                    }
-                });
+                APIService apiService = RetrofitClient.getInstance().create(APIService.class);
+                fetchDate(apiService);
                 break;
             case DB:
                 DBHelper dbHelper = new DBHelper(getContext());
-                final List<Album> albums = dbHelper.selectAlbums();
-                MyAlbumsRecyclerViewAdapter adapter = new MyAlbumsRecyclerViewAdapter(albums, mListener, ioType);
-                recyclerView.setAdapter(adapter);
-                recyclerView.getAdapter().notifyDataSetChanged();
+                displayData(dbHelper.selectAlbums());
                 break;
         }
 
         return recyclerView;
+    }
+
+    private void fetchDate(APIService apiService) {
+        CompositeDisposable compositeDisposable = new CompositeDisposable();
+        compositeDisposable.add(apiService.loadAlbums()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::displayData));
+    }
+
+    private void displayData(List<Album> albums) {
+        MyAlbumsRecyclerViewAdapter adapter = new MyAlbumsRecyclerViewAdapter(albums, mListener, ioType);
+        recyclerView.setAdapter(adapter);
     }
 
 

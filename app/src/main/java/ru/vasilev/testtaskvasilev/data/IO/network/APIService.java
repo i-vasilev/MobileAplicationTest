@@ -2,7 +2,7 @@ package ru.vasilev.testtaskvasilev.data.IO.network;
 
 import java.util.List;
 
-import retrofit2.Call;
+import io.reactivex.Observable;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 import ru.vasilev.testtaskvasilev.data.Album;
@@ -12,8 +12,8 @@ public interface APIService {
     String URL = "https://jsonplaceholder.typicode.com/";
 
     @GET("albums")
-    Call<List<Album>> loadAlbums();
+    Observable<List<Album>> loadAlbums();
 
     @GET("photos")
-    Call<List<Photo>> loadPhotos(@Query("albumId") int albumId);
+    Observable<List<Photo>> loadPhotos(@Query("albumId") int albumId);
 }

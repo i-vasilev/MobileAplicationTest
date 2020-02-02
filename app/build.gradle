@@ -36,6 +36,9 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.5.0'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    implementation 'io.reactivex.rxjava2:rxjava:2.0.1'
     implementation("com.squareup.okhttp3:okhttp:4.3.1")
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.zolad:zoominimageview:1.0.0'

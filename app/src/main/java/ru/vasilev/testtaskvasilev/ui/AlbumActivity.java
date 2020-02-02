@@ -13,15 +13,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 import ru.vasilev.testtaskvasilev.R;
 import ru.vasilev.testtaskvasilev.data.Album;
 import ru.vasilev.testtaskvasilev.data.IO.IOType;
 import ru.vasilev.testtaskvasilev.data.IO.db.DBHelper;
 import ru.vasilev.testtaskvasilev.data.IO.network.APIService;
-import ru.vasilev.testtaskvasilev.data.IO.network.ApiServiceFactory;
+import ru.vasilev.testtaskvasilev.data.IO.network.RetrofitClient;
 import ru.vasilev.testtaskvasilev.data.Photo;
 import ru.vasilev.testtaskvasilev.data.adapters.PhotosRecyclerViewAdapter;
 
@@ -55,37 +55,30 @@ public class AlbumActivity extends AppCompatActivity implements PhotosRecyclerVi
 
             switch (ioType) {
                 case Network:
-                    ApiServiceFactory apiServiceFactory = new ApiServiceFactory();
-                    APIService apiService = apiServiceFactory.Read();
-                    Call<List<Photo>> listCallPhotos = apiService.loadPhotos(album.getId());
-                    listCallPhotos.enqueue(new Callback<List<Photo>>() {
-                        @Override
-                        public void onResponse(Call<List<Photo>> call, Response<List<Photo>> response) {
-                            if (response.isSuccessful()) {
-                                photos = response.body();
-                                PhotosRecyclerViewAdapter adapterPhotos =
-                                        new PhotosRecyclerViewAdapter(photos, listener);
-                                recyclerView.setAdapter(adapterPhotos);
-                                adapterPhotos.notifyDataSetChanged();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<List<Photo>> call, Throwable t) {
-                        }
-                    });
+                    APIService service = RetrofitClient.getInstance().create(APIService.class);
+                    fetchDate(service);
                     break;
                 case DB:
                     DBHelper dbHelper = new DBHelper(getApplicationContext());
                     photos = dbHelper.selectPhotos(album.getId());
-
-                    PhotosRecyclerViewAdapter adapterPhotos =
-                            new PhotosRecyclerViewAdapter(photos, listener);
-                    recyclerView.setAdapter(adapterPhotos);
-                    adapterPhotos.notifyDataSetChanged();
+                    displayData(photos);
                     break;
             }
         }
+    }
+
+    private void fetchDate(APIService service) {
+        CompositeDisposable compositeDisposable = new CompositeDisposable();
+        compositeDisposable.add(service.loadPhotos(album.getId())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::displayData));
+    }
+
+    private void displayData(List<Photo> photos) {
+        PhotosRecyclerViewAdapter adapterPhotos =
+                new PhotosRecyclerViewAdapter(photos, listener);
+        recyclerView.setAdapter(adapterPhotos);
     }
 
     @Override
