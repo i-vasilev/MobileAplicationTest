@@ -81,9 +81,19 @@ public class AlbumActivity extends AppCompatActivity implements PhotosRecyclerVi
         recyclerView.setAdapter(adapterPhotos);
     }
 
+    private boolean checkInDB() {
+        DBHelper dbHelper = new DBHelper(getApplicationContext());
+        return dbHelper.getAlbumById(album.getId()) != null;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        if (checkInDB()) {
+            menu.getItem(0).setIcon(android.R.drawable.star_big_on);
+        } else {
+            menu.getItem(0).setIcon(android.R.drawable.star_big_off);
+        }
         return true;
     }
 
@@ -96,7 +106,13 @@ public class AlbumActivity extends AppCompatActivity implements PhotosRecyclerVi
                 return true;
             case R.id.addToFavourite:
                 DBHelper dbHelper = new DBHelper(getApplicationContext());
-                dbHelper.insertOrReplaceAlbum(album, photos);
+                if (!checkInDB()) {
+                    dbHelper.insertOrReplaceAlbum(album, photos);
+                    item.setIcon(android.R.drawable.star_big_on);
+                } else {
+                    dbHelper.removeAlbum(album);
+                    item.setIcon(android.R.drawable.star_big_off);
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

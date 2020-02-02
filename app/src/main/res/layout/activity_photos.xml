@@ -9,6 +9,6 @@
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context=".AlbumActivity"
+    tools:context=".ui.AlbumActivity"
     tools:listitem="@layout/album_photo_item"
     />

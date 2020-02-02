@@ -93,6 +93,16 @@ public class DBHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void removeAlbum(Album album) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String where = ApplicationContract.AlbumTable._ID + " = ?";
+        String[] whereArgs = {String.valueOf(album.getId())};
+        db.delete(ApplicationContract.AlbumTable.TABLE_NAME, where, whereArgs);
+        where = ApplicationContract.PhotoTable.ALBUM_ID + " = ?";
+        db.delete(ApplicationContract.PhotoTable.TABLE_NAME, where, whereArgs);
+        db.close();
+    }
+
     public List<Photo> selectPhotos(int albumId) {
         List<Photo> photos = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -114,6 +124,26 @@ public class DBHelper extends SQLiteOpenHelper {
                 photos.add(photo);
             } while (cursor.moveToNext());
         }
+        cursor.close();
+        db.close();
         return photos;
+    }
+
+    public Album getAlbumById(int albumId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {ApplicationContract.AlbumTable.TITLE, ApplicationContract.AlbumTable._ID};
+        String selection = ApplicationContract.AlbumTable._ID + " = ?";
+        String[] selectionArgs = {String.valueOf(albumId)};
+        Cursor cursor = db.query(ApplicationContract.AlbumTable.TABLE_NAME, columns,
+                selection, selectionArgs, null, null, null);
+        if (cursor.moveToFirst()) {
+            Album album = new Album();
+            album.setTitle(cursor.getString(0));
+            album.setId(cursor.getInt(1));
+            return album;
+        }
+        cursor.close();
+        db.close();
+        return null;
     }
 }
