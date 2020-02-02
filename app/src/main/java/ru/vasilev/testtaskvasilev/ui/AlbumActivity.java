@@ -60,8 +60,7 @@ public class AlbumActivity extends AppCompatActivity implements PhotosRecyclerVi
                     break;
                 case DB:
                     DBHelper dbHelper = new DBHelper(getApplicationContext());
-                    photos = dbHelper.selectPhotos(album.getId());
-                    displayData(photos);
+                    displayData(dbHelper.selectPhotos(album.getId()));
                     break;
             }
         }
@@ -76,6 +75,7 @@ public class AlbumActivity extends AppCompatActivity implements PhotosRecyclerVi
     }
 
     private void displayData(List<Photo> photos) {
+        this.photos = photos;
         PhotosRecyclerViewAdapter adapterPhotos =
                 new PhotosRecyclerViewAdapter(photos, listener);
         recyclerView.setAdapter(adapterPhotos);

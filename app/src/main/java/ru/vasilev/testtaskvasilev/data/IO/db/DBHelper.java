@@ -86,6 +86,7 @@ public class DBHelper extends SQLiteOpenHelper {
             contentValues.put(ApplicationContract.PhotoTable.ALBUM_ID, album.getId());
             contentValues.put(ApplicationContract.PhotoTable.THUMBNAIL_URL, photo.getThumbnailUrl());
             contentValues.put(ApplicationContract.PhotoTable.TITLE, photo.getTitle());
+            contentValues.put(ApplicationContract.PhotoTable._ID, photo.getId());
             contentValues.put(ApplicationContract.PhotoTable.URL, photo.getUrl());
             db.replace(ApplicationContract.PhotoTable.TABLE_NAME, null, contentValues);
         }
