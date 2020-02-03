@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
 
 import java.util.List;
 
@@ -65,7 +64,7 @@ public class AlbumsFragment extends Fragment {
         Context context = recyclerView.getContext();
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         ioType = IOType.valueOf(getArguments().getString(IO_TYPE_NAME));
-        updateList();
+        updateCoords();
         return recyclerView;
     }
 
@@ -73,11 +72,11 @@ public class AlbumsFragment extends Fragment {
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser && ioType != null) {
-            updateList();
+            updateCoords();
         }
     }
 
-    public void updateList() {
+    public void updateCoords() {
         switch (ioType) {
             case Network:
                 APIService apiService = RetrofitClient.getInstance().create(APIService.class);
@@ -87,6 +86,14 @@ public class AlbumsFragment extends Fragment {
                 DBHelper dbHelper = new DBHelper(getContext());
                 displayData(dbHelper.selectAlbums());
                 break;
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (ioType == IOType.DB) {
+            updateCoords();
         }
     }
 

@@ -7,15 +7,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.RequiresApi;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,21 +16,32 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
+
 import java.io.IOException;
 import java.util.Date;
+import java.util.Objects;
 
+import moxy.MvpAppCompatFragment;
+import moxy.presenter.InjectPresenter;
 import ru.vasilev.testtaskvasilev.R;
+import ru.vasilev.testtaskvasilev.mvp.presenters.GpsLocationPresenter;
+import ru.vasilev.testtaskvasilev.mvp.views.GpsLocationView;
 
+import static androidx.core.content.ContextCompat.checkSelfPermission;
 
-/**
- * A simple {@link Fragment} subclass.
- */
-public class GpsFragment extends Fragment {
+public class GpsFragment extends MvpAppCompatFragment implements GpsLocationView {
+
+    @InjectPresenter
+    public GpsLocationPresenter mGpsLocationPresenter;
 
     private TextView textView;
     private LocationManager locationManager;
-    private boolean isStartedListener = false;
     private MediaPlayer mediaPlayer;
+    private Button button;
+    private Context mContext;
 
     public GpsFragment() {
     }
@@ -61,7 +65,7 @@ public class GpsFragment extends Fragment {
 
         @Override
         public void onProviderEnabled(String provider) {
-            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_MEDIA_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(getContext(), Manifest.permission.ACCESS_MEDIA_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 showLocation(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
             } else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -82,29 +86,13 @@ public class GpsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_gps, container, false);
         locationManager = (LocationManager) inflater.getContext().getSystemService(Context.LOCATION_SERVICE);
-        final Button button = view.findViewById(R.id.gps);
+        button = view.findViewById(R.id.gps);
         textView = view.findViewById(R.id.infoGps);
         mediaPlayer = MediaPlayer.create(this.getContext(), R.raw.music);
         button.setOnClickListener(v -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (inflater.getContext().checkSelfPermission(Manifest.permission.ACCESS_MEDIA_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    if (!isStartedListener) {
-                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                                1, 1, locationListener);
-                        button.setText(R.string.Stop);
-                        mediaPlayer.start();
-                    } else {
-                        locationManager.removeUpdates(locationListener);
-                        button.setText(R.string.Start);
-                        mediaPlayer.stop();
-                        try {
-                            mediaPlayer.prepare();
-                            mediaPlayer.seekTo(0);
-                        } catch (IOException e) {
-                            Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                    isStartedListener = !isStartedListener;
+                    mGpsLocationPresenter.changeStateGeolocation();
                 }
             }
         });
@@ -127,9 +115,50 @@ public class GpsFragment extends Fragment {
     private String formatLocation(Location location) {
         if (location == null)
             return "";
-        return String.format(
-                getContext().getString(R.string.coordinatesString),
+        return String.format(Objects.requireNonNull(mContext).getString(R.string.coordinatesString),
                 location.getLatitude(), location.getLongitude(), new Date(
                         location.getTime()));
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mContext = context;
+    }
+
+    @Override
+    public void startGPS() {
+        final FragmentActivity activity = Objects.requireNonNull(this.getActivity());
+
+        int permissionStatus = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
+        if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                    1, 1, locationListener);
+        } else {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    10001);
+        }
+        button.setText(R.string.Stop);
+    }
+
+    @Override
+    public void stopGPS() {
+        locationManager.removeUpdates(locationListener);
+        button.setText(R.string.Start);
+    }
+
+    @Override
+    public void setMusic(boolean isStarted) {
+        if (isStarted) {
+            mediaPlayer.start();
+        } else {
+            try {
+                mediaPlayer.stop();
+                mediaPlayer.prepare();
+                mediaPlayer.seekTo(0);
+            } catch (IOException e) {
+                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }
