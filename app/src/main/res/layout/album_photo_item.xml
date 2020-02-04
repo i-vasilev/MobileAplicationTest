@@ -4,22 +4,28 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:card_view="http://schemas.android.com/tools"
-    android:layout_marginBottom="3dp">
+    android:background="#ccc">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginVertical="15dp"
+        android:paddingVertical="10dp"
+        android:paddingHorizontal="5dp"
+        app:cardElevation="10dp"
         card_view:cardCornerRadius="4dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:padding="10dp"
             android:orientation="horizontal">
 
             <ImageView
                 android:id="@+id/photoPreview"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:maxWidth="30dp"
                 android:maxHeight="30dp" />
 
@@ -27,7 +33,10 @@
                 android:id="@+id/photoDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:layout_marginStart="10dp"
+                android:textSize="@dimen/textSizeCardPhoto"
+                android:text="TextView"
+                android:layout_marginLeft="10dp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
