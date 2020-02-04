@@ -24,6 +24,8 @@ public class PhotoActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         String url = getIntent().getStringExtra(AlbumActivity.PHOTO_IMAGE);
+        String title = getIntent().getStringExtra(AlbumActivity.PHOTO_TITLE);
+        actionBar.setTitle(title);
         Uri uri = Uri.parse(url);
         ImageView photoView = findViewById(R.id.photoView);
         Picasso.get().load(uri).into(photoView);

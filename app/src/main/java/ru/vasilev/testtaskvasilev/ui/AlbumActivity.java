@@ -34,6 +34,7 @@ public class AlbumActivity extends AppCompatActivity implements PhotosRecyclerVi
 
     private RecyclerView recyclerView;
     public final static String PHOTO_IMAGE = "photo-image";
+    public final static String PHOTO_TITLE = "photo-title";
     private PhotosRecyclerViewAdapter.OnClickPhotoListener listener;
     private Album album;
     List<Photo> photos;
@@ -51,6 +52,7 @@ public class AlbumActivity extends AppCompatActivity implements PhotosRecyclerVi
 
         View view = findViewById(R.id.list);
         album = getIntent().getParcelableExtra(MainActivity.album);
+        actionBar.setTitle(album.getTitle());
         if (view instanceof RecyclerView) {
             recyclerView = (RecyclerView) view;
 
@@ -136,6 +138,7 @@ public class AlbumActivity extends AppCompatActivity implements PhotosRecyclerVi
     public void onClickPhoto(Photo item) {
         Intent intent = new Intent(getApplicationContext(), PhotoActivity.class);
         intent.putExtra(PHOTO_IMAGE, item.getUrl());
+        intent.putExtra(PHOTO_TITLE, item.getTitle());
         startActivity(intent);
     }
 
