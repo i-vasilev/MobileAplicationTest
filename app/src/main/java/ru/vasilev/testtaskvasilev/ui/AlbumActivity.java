@@ -1,6 +1,9 @@
 package ru.vasilev.testtaskvasilev.ui;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -67,11 +70,21 @@ public class AlbumActivity extends AppCompatActivity implements PhotosRecyclerVi
     }
 
     private void fetchDate(APIService service) {
-        CompositeDisposable compositeDisposable = new CompositeDisposable();
-        compositeDisposable.add(service.loadPhotos(album.getId())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::displayData));
+        if (isInternetAvailable()) {
+            CompositeDisposable compositeDisposable = new CompositeDisposable();
+            compositeDisposable.add(service.loadPhotos(album.getId())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::displayData));
+        }
+    }
+
+
+    private boolean isInternetAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     private void displayData(List<Photo> photos) {

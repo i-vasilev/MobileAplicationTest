@@ -1,6 +1,8 @@
 package ru.vasilev.testtaskvasilev.ui.main;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -98,11 +100,13 @@ public class AlbumsFragment extends Fragment {
     }
 
     private void fetchDate(APIService apiService) {
-        CompositeDisposable compositeDisposable = new CompositeDisposable();
-        compositeDisposable.add(apiService.loadAlbums()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::displayData));
+        if (isInternetAvailable()) {
+            CompositeDisposable compositeDisposable = new CompositeDisposable();
+            compositeDisposable.add(apiService.loadAlbums()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::displayData));
+        }
     }
 
     private void displayData(List<Album> albums) {
@@ -129,6 +133,13 @@ public class AlbumsFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    private boolean isInternetAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     public interface OnListFragmentInteractionListener {
